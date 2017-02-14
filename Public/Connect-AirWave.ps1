@@ -1,6 +1,7 @@
 ﻿## Returns a session-cookie used for authenticating queries to API
 function Connect-AirWave
 {
+    [CmdletBinding()]
     param
     (
         [Parameter( Mandatory = $True,
@@ -10,6 +11,10 @@ function Connect-AirWave
                     Position = 1 )]
         [pscredential]$Credential
     )
+
+    ## We need to add /LOGIN to the Api link
+    $ApiLogin = "$Api/LOGIN"
+
     ## Fixes: "Invoke-WebRequest : The request was aborted: Could not create SSL/TLS secure channel"
     [System.Net.ServicePointManager]::SecurityProtocol = @("Tls12","Tls11","Tls","Ssl3")
 
@@ -20,13 +25,22 @@ function Connect-AirWave
         destination = '/'
         login = 'Log In'
     }
-    
+
     ## Send post request to login page to get our SessionID cookie
-    $Cookie = Invoke-WebRequest -Uri $Api -Method Post -Body $Body
+    $Cookie = Invoke-WebRequest -Uri $ApiLogin -Method Post -Body $Body -SessionVariable Session
     if (!($Cookie.Headers.'X-BISCOTTI'))
     {
         throw "Failed to authenticate with AMP."
     }
 
-    $Cookie.Headers.'X-BISCOTTI'
+    [PSCustomObject]@{
+        "Cookie" = $Cookie.Headers.'X-BISCOTTI'
+        "Api" = $Api
+        "Credential" = $Credential
+        "Session" = $Session
+    }
+    # https://community.arubanetworks.com/t5/Monitoring-Management-Location/Use-AirWave-XML-API-with-cURL-and-new-X-BISCOTTI-header/ta-p/214799
+    # -D, --dump-header <filename>
+    # -c, --cookie-jar <filename>
+    # What are the PoSh params for this?
 }
