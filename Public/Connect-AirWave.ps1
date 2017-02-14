@@ -39,8 +39,4 @@ function Connect-AirWave
         "Credential" = $Credential
         "Session" = $Session
     }
-    # https://community.arubanetworks.com/t5/Monitoring-Management-Location/Use-AirWave-XML-API-with-cURL-and-new-X-BISCOTTI-header/ta-p/214799
-    # -D, --dump-header <filename>
-    # -c, --cookie-jar <filename>
-    # What are the PoSh params for this?
 }
