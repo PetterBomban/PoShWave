@@ -1,0 +1,7 @@
+function Invoke-AirWaveQuery
+{
+    param
+    (
+        
+    )
+}
