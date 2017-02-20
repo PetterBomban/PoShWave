@@ -6,10 +6,11 @@ function Connect-AirWave
     (
         [Parameter( Mandatory = $True,
                     Position = 0 )]
-        [string]$Api,
+        [string] $Api,
+        
         [Parameter( Mandatory = $True,
                     Position = 1 )]
-        [pscredential]$Credential
+        [pscredential] $Credential
     )
 
     ## We need to add /LOGIN to the Api link

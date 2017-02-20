@@ -1,4 +1,4 @@
-function Get-AmpStats
+function Get-AirWaveStats
 {
     [CmdletBinding()]
     param
@@ -6,7 +6,7 @@ function Get-AmpStats
         [Parameter( Mandatory = $True,
                     Position = 0,
                     ValueFromPipeline = $True )]
-        [PSCustomObject]$Session
+        [PSCustomObject] $Session
     )
 
     Write-Verbose "Getting AMP stats.."

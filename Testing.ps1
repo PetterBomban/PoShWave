@@ -12,8 +12,16 @@ if(!($credential))
 }
 $con = Connect-AirWave -Api "https://900-araw-01.akershus-fk.no" -Credential $credential
 
-# ApList
-$con | Get-ApList -Id 533 -Verbose
+# Full list of devices
+#$con | Get-AirWaveDevice -Verbose
+
+# Sort by device type
+# $con | Get-AirWaveDevice -DeviceType "switch" -Verbose
+
+## Export switches to csv (TODO: Excel?)
+$switches = $con | Get-AirWaveDevice -DeviceType "switch"
+$switches
+
 
 # Amp Status
 #$con | Get-AmpStats -Verbose
