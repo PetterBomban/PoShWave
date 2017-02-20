@@ -27,12 +27,14 @@ function Connect-AirWave
     }
 
     ## Send post request to login page to get our SessionID cookie
+    Write-Verbose "Attempting to authenticate with AirWave."
     $Cookie = Invoke-WebRequest -Uri $ApiLogin -Method Post -Body $Body -SessionVariable Session
     if (!($Cookie.Headers.'X-BISCOTTI'))
     {
         throw "Failed to authenticate with AMP."
     }
 
+    Write-Verbose "Authentication succeeded, returning cookie"
     [PSCustomObject]@{
         "Cookie" = $Cookie.Headers.'X-BISCOTTI'
         "Api" = $Api
