@@ -33,8 +33,14 @@ function Get-AirWaveDevice
 
     ## if $DeviceType is set, we only return the elements that are of that type
     ## otherwise we just return the whole response
-    if (!($DeviceType)) { $Response.amp_ap_list.ap }
-    $Response.amp_ap_list.ap | ForEach-Object {
-        $PSItem | Where-Object { $_.device_category -like "*$DeviceType*" }
+    if (!($DeviceType))
+    {
+        $Response.amp_ap_list.ap
+    }
+    else
+    {
+        $Response.amp_ap_list.ap | ForEach-Object {
+            $PSItem | Where-Object { $_.device_category -like "*$DeviceType*" }
+        }
     }
 }
