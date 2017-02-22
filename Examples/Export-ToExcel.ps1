@@ -1,17 +1,13 @@
-## Plan:
-## AP's and switches show what device they are connected to,
-## and what port they are connected to.
-## We need to get a list of all switches, and then all ap's.
-## After that, we compare the values to see what is connected where.
-## Export to excel. Csv?
+## Requires ImportExcel-module
+## Install-Module ImportExcel
 
 param
 (
     [PScredential]$credential
 )
 
-Remove-Module PoShWave
-Import-Module ..\PoShWave.psm1
+Remove-Module PoShWave -ErrorAction SilentlyContinue
+Import-Module ..\PoShWave.psm1, ImportExcel
 
 $con = Connect-AirWave -Api "https://900-araw-01.akershus-fk.no" -Credential $credential
 
@@ -27,12 +23,39 @@ function Export-SwitchesAndAPsToCsv
 
         [Parameter( Mandatory = $True,
                     Position = 1)]
-        [String] $Path
+        [String] $Path = "C:\"
     )
 
+    $col = @()
     foreach ($Switch in $Collection.GetEnumerator())
     {
-        $Switch.Value
+        ## Setting custom styles to the table
+        $CellStyles = {
+            param
+            (
+                $workSheet,
+                $totalRows,
+                $lastColumn
+            )
+            
+            Set-CellStyle $workSheet 1 $lastColumn Solid Gray
+
+            foreach ($row in (2..$totalRows | Where-Object {  $_ % 2 -eq 0 }))
+            {
+                Set-CellStyle $workSheet $row $lastColumn Solid LightGray
+            }
+            foreach ($row in (2..$totalRows | Where-Object {  $_ % 2 -eq 1 }))
+            {
+                Set-CellStyle $workSheet $row $lastColumn Solid White
+            }
+        }
+        $ExportSplat = @{
+            Path = $Path
+            WorkSheetname = $Switch.Key
+            Autosize = $True
+            CellStyleSB = $CellStyles
+        }
+        $Switch.Value | Sort-Object Port | Export-Excel @ExportSplat
     }
 }
 
@@ -78,13 +101,13 @@ function Get-SwitchesAndAPs
         [void]$Visited.Add($ApIp)
 
         $obj = [PSCustomObject]@{
+            SwitchName = $SwitchName
+            Port = $ApPort
             ApName = $ApName
             ApIp = $ApIp
-            SwitchApPort = $ApPort
         }
         $Collection[$SwitchName] += @($obj)
     }
-
     $Collection
 }
 
