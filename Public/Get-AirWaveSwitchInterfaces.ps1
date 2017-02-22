@@ -23,6 +23,7 @@ function Get-AirWaveSwitchInterfaces
     $Csv = Import-Csv -Path $Outfile -Delimiter ","
 
     ## Ordering the switchports
+    Write-Verbose "Ordering ports"
     $OrderedCollection = @()
     $PortNumber = $Csv.Count
     for ($i = 0; $i -le $PortNumber; $i++)
@@ -31,7 +32,7 @@ function Get-AirWaveSwitchInterfaces
         {
             $CurrPort = $Switchport.Interface
             $CurrPort = $CurrPort.Split("/")[1] + "/" + $CurrPort.Split("/")[2]
-            
+
             ## If the switch only contains "/", it's the mgmt-port
             if ($CurrPort -eq "/") { $CurrPort = "mgmt" }
             
