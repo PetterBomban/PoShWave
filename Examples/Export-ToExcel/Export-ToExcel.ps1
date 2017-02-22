@@ -55,8 +55,19 @@ function Export-SwitchesAndAPsToExcel
             BoldTopRow = $True
             Autosize = $True
         }
-        $Export = $Switch.Value | Sort-Object SwitchPort
-        $Export | Export-Excel @ExportSplat
+        $Select = @(
+            "SwitchName",
+            "SwitchIp",
+            "SwitchMac",
+            "SwitchSerial",
+            "SwitchPort",
+            "ApName",
+            "ApIp",
+            "ApMac",
+            "ApSerial"
+        )
+        $Export = $Switch.Value
+        $Export | Select-Object $Select | Sort-Object SwitchPort | Export-Excel @ExportSplat
     }
 }
 
@@ -112,10 +123,10 @@ function Get-SwitchesAndAPs
             SwitchMac = $SwitchMac
             SwitchSerial = $SwitchSerial
             SwitchPort = $ApPort
-            DeviceName = $ApName
-            DeviceIp = $ApIp
-            DeviceMac = $ApMac
-            DeviceSerial = $ApSerial
+            ApName = $ApName
+            ApIp = $ApIp
+            ApMac = $ApMac
+            ApSerial = $ApSerial
         }
         $Collection[$SwitchName] += @($obj)
     }
@@ -166,10 +177,6 @@ function Get-SwitchesAndAPs
                     SwitchMac = $SwitchMac
                     SwitchSerial = $SwitchSerial
                     SwitchPort = $i
-                    DeviceName = ""
-                    DeviceIp = ""
-                    DeviceMac = ""
-                    DeviceSerial = ""
                 }
                 $CollectionCopy[$Switch.name] += @($EmptyPortObj)
             }
@@ -179,4 +186,4 @@ function Get-SwitchesAndAPs
 }
 
 $TestPath = "C:\users\admin\documents\github\poshwave\test.xlsx"
-$con | Get-SwitchesAndAPs -Verbose | Export-SwitchesAndAPsToExcel -Path $TestPath
+$con | Get-SwitchesAndAPs | Export-SwitchesAndAPsToExcel -Path $TestPath
