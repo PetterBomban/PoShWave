@@ -1,4 +1,5 @@
 # Export-ToExcel
+![Preview of results](https://raw.githubusercontent.com/PetterBomban/PoShWave/master/Examples/Export-ToExcel/Export-ToExcel.png)
 
 This script will export switches that have accesss points active on them.
 
