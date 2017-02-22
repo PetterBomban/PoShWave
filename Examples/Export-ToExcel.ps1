@@ -1,6 +1,5 @@
 ## Requires ImportExcel-module
 ## Install-Module ImportExcel
-
 param
 (
     [PScredential]$credential
@@ -11,7 +10,7 @@ Import-Module ..\PoShWave.psm1, ImportExcel
 
 $con = Connect-AirWave -Api "https://900-araw-01.akershus-fk.no" -Credential $credential
 
-function Export-SwitchesAndAPsToCsv
+function Export-SwitchesAndAPsToExcel
 {
     [CmdletBinding()]
     param
@@ -37,8 +36,8 @@ function Export-SwitchesAndAPsToCsv
                 $totalRows,
                 $lastColumn
             )
-            
-            Set-CellStyle $workSheet 1 $lastColumn Solid Gray
+
+            Set-CellStyle $workSheet 1 $lastColumn Solid SkyBlue
 
             foreach ($row in (2..$totalRows | Where-Object {  $_ % 2 -eq 0 }))
             {
@@ -52,10 +51,12 @@ function Export-SwitchesAndAPsToCsv
         $ExportSplat = @{
             Path = $Path
             WorkSheetname = $Switch.Key
-            Autosize = $True
             CellStyleSB = $CellStyles
+            BoldTopRow = $True
+            Autosize = $True
         }
-        $Switch.Value | Sort-Object Port | Export-Excel @ExportSplat
+        $Export = $Switch.Value | Sort-Object SwitchPort
+        $Export | Export-Excel @ExportSplat
     }
 }
 
@@ -86,15 +87,20 @@ function Get-SwitchesAndAPs
 
     foreach ($AP in $APs)
     {
-        $ApPort = $AP.upstream_port_index
+        [int]$ApPort = $AP.upstream_port_index
         $ApConnectedTo = $AP.upstream_device_id
         $ApName = $AP.name
         $ApIp = $AP.lan_ip
+        $ApMac = $AP.lan_mac
+        $ApSerial = $AP.serial_number
 
         $Switch = $Switches | Where-Object { $_.id -eq $ApConnectedTo }
         ## Quick and dirty to avoid errors
-        if ($Switch.name -eq $null) { $Switch = [PSCustomObject]@{ name = @("_UNKNOWN")}}
-        $SwitchName = ($Switch.name)[0]
+        if ($Switch.name -eq $null) { $Switch = [PSCustomObject]@{ name = "_UNKNOWN"}}
+        $SwitchName = $Switch.name
+        $SwitchIp = $Switch.lan_ip
+        $SwitchMac = $Switch.lan_mac
+        $SwitchSerial = $Switch.serial_number
 
         ## Skip already visited APs (since the api returns one several times..?)
         if ($Visited.Contains($ApIp)) { continue }
@@ -102,13 +108,77 @@ function Get-SwitchesAndAPs
 
         $obj = [PSCustomObject]@{
             SwitchName = $SwitchName
-            Port = $ApPort
-            ApName = $ApName
-            ApIp = $ApIp
+            SwitchIp = $SwitchIp
+            SwitchMac = $SwitchMac
+            SwitchSerial = $SwitchSerial
+            SwitchPort = $ApPort
+            SwitchNet = ""
+            DeviceName = $ApName
+            DeviceIp = $ApIp
+            DeviceMac = $ApMac
+            DeviceSerial = $ApSerial
         }
         $Collection[$SwitchName] += @($obj)
     }
-    $Collection
+    
+    ## Copy of collection to stop "Collection was modified.."-troubles
+    $CollectionCopy = $Collection.PSObject.Copy()
+
+    ## Ugly logic for determining the number of ports on the switch
+    ## Works by getting the $Switch.model.'#text' field and parsing
+    ## out the number of ports.
+    foreach ($Switch in $Collection.GetEnumerator())
+    {
+        ## We do this because some times we couldn't get the name of the switch
+        ## an AP is connected to, so we just create placeholder values.
+        if (!($SwitchInfo = $Switches | Where-Object name -eq $Switch.name))
+        {
+            $SwitchName = "_UNKNOWN"
+            $SwitchPortNum = 48
+        }
+        else
+        {
+            $SwitchName = $Switch.name
+            $SwitchPortNum = $SwitchInfo.model.'#text'
+            $SwitchPortNum = ($SwitchPortNum.Split("-"))[1] -replace "P"
+        }
+        $SwitchMac = $SwitchInfo.lan_mac
+        $SwitchSerial = $SwitchInfo.serial_number
+        $SwitchIp = $SwitchInfo.lan_ip
+
+        ## An array of ports already containing an AP/AirWave-detected device.
+        $SwitchApConnectedPorts = @()
+        $Switch.Value.SwitchPort | ForEach-Object {
+            $SwitchApConnectedPorts += $PSItem
+        }
+
+        ## Here we go through the $Collection to determine which ports
+        ## are not connected to an AP. If they are not, we just create 
+        ## an empty element with the free port number for prettier
+        ## Excel documentation.
+        1..$SwitchPortNum | ForEach-Object {
+            $i = $PSItem            
+            if (!($SwitchApConnectedPorts -contains $i))
+            {
+                Write-Verbose "Port $i - does not contain an AP, creating empty."
+                $EmptyPortObj = [PSCustomObject]@{
+                    SwitchName = $SwitchName
+                    SwitchIp = $SwitchIp
+                    SwitchMac = $SwitchMac
+                    SwitchSerial = $SwitchSerial
+                    SwitchPort = $i
+                    SwitchNet = ""
+                    DeviceName = ""
+                    DeviceIp = ""
+                    DeviceMac = ""
+                    DeviceSerial = ""
+                }
+                $CollectionCopy[$Switch.name] += @($EmptyPortObj)
+            }
+        }
+    }
+    $CollectionCopy
 }
 
-
+$TestPath = "C:\users\admin\documents\github\poshwave\test.xlsx"
+$con | Get-SwitchesAndAPs -Verbose | Export-SwitchesAndAPsToExcel -Path $TestPath
