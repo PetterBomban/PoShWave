@@ -21,10 +21,6 @@ $con | Get-AirWaveClientDetail -Mac "78:F8:82:B6:64:A5"
 # Sort by device type
 # $con | Get-AirWaveDevice -DeviceType "switch" -Verbose
 
-## Export switches to csv (TODO: Excel?)
-#$switches = $con | Get-AirWaveDevice -DeviceType "switch"
-#$switches
-
 # Get individual device
 #$con | Get-AirWaveDevice -Id 3481 -Verbose
 
@@ -34,5 +30,3 @@ $con | Get-AirWaveClientDetail -Mac "78:F8:82:B6:64:A5"
 
 # Amp Status
 #$con | Get-AmpStats -Verbose
-
-
