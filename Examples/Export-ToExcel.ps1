@@ -112,7 +112,6 @@ function Get-SwitchesAndAPs
             SwitchMac = $SwitchMac
             SwitchSerial = $SwitchSerial
             SwitchPort = $ApPort
-            SwitchNet = ""
             DeviceName = $ApName
             DeviceIp = $ApIp
             DeviceMac = $ApMac
@@ -167,7 +166,6 @@ function Get-SwitchesAndAPs
                     SwitchMac = $SwitchMac
                     SwitchSerial = $SwitchSerial
                     SwitchPort = $i
-                    SwitchNet = ""
                     DeviceName = ""
                     DeviceIp = ""
                     DeviceMac = ""
