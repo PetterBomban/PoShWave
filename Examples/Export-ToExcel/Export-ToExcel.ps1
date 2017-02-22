@@ -6,7 +6,7 @@ param
 )
 
 Remove-Module PoShWave -ErrorAction SilentlyContinue
-Import-Module ..\PoShWave.psm1, ImportExcel
+Import-Module "C:\Users\admin\Documents\GitHub\PoShWave\PoShWave.psm1", ImportExcel
 
 $con = Connect-AirWave -Api "https://900-araw-01.akershus-fk.no" -Credential $credential
 
