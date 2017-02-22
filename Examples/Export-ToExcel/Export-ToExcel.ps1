@@ -66,6 +66,7 @@ function Export-SwitchesAndAPsToExcel
             "ApMac",
             "ApSerial"
         )
+        ## TODO: On empty ports, find a way to make it so that stuff isn't overwritten.
         $Export = $Switch.Value
         $Export | Select-Object $Select | Sort-Object SwitchPort | Export-Excel @ExportSplat
     }
@@ -137,6 +138,9 @@ function Get-SwitchesAndAPs
     ## Ugly logic for determining the number of ports on the switch
     ## Works by getting the $Switch.model.'#text' field and parsing
     ## out the number of ports.
+    ## This actually might be temporary, as we can get a .csv-file
+    ## of all the ports (but not the devices connected) by using this
+    ## link: $API/nf/csv_export.csv?csv_export_uri=%2Finterface_list&csv_export_list_namespace=aruba_physical_interfaces&csv_export_list_args=ap_id%3D{SWITCH_ID}
     foreach ($Switch in $Collection.GetEnumerator())
     {
         ## We do this because some times we couldn't get the name of the switch
