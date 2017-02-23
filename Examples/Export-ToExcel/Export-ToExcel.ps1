@@ -145,13 +145,18 @@ function Add-APsToSwitches
         {
             $CurrSwitchWithAPs =
                 $SwitchWithAPs | Where-Object { $_.SwitchName -eq $SwitchPort.SwitchName }
-            Write-Debug $CurrSwitchWithAPs
-            
-            ## These two now match
-            $SwitchPort # Current SwitchPort Object, no APs
-            $CurrSwitchWithAPs ## Current Switch with AP
+            $CurrSwitchWithAPsNum = $CurrSwitchWithAPs.AccessPoints.upstream_port_index
 
-            ## Next: Find out 
+            ## These two now mach - ~1)~
+            #$CurrSwitchWithAPs
+            #$SwitchPort
+
+            <# Pseudo
+            $CurrSwitchWithAPs | Where-Object { $_.Interface -like "*/0/$PortNum" -or
+                                                $_.Interface -like "*/1/$PortNum" }
+            ^Insert AP there.
+            #>
+            }
         }
         #>
     }
