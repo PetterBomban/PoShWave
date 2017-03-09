@@ -155,10 +155,9 @@ function Add-APsToSwitches
             $CurrSwitchWithAPs | Where-Object { $_.Interface -like "*/0/$PortNum" -or
                                                 $_.Interface -like "*/1/$PortNum" }
             ^Insert AP there.
-            #>
-            }
+            
+            }#>
         }
-        #>
     }
 }
 
@@ -215,7 +214,7 @@ function Export-ToExcel
             FreezeTopRow = $True
         }
         ## Testing for $DataMember
-        if(!($Export = $Collection.$DataMember))
+        if(!($Export == $Collection.$DataMember))
         {
             $Export = $Collection
         }
@@ -234,3 +233,5 @@ Add-APsToSwitches -APsAndSwitches $APs -SwitchPorts $SwitchPorts
 #|Export-ToExcel -Path $Doc -Select $SelectSplat
 
 #$con | Get-SwitchInterfaces | Export-ToExcel -Path $SwitchPortsPath -DataMember "SwitchPorts"
+
+$con | Get-APsWithSwitches | Export-ToExcel -Path $SwitchPortsPath -DataMember
